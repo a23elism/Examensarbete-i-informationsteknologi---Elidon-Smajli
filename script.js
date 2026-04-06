@@ -13,7 +13,7 @@ const tileTypes = [
 
 const boardData = [];
 
-// Creates singular tile/squate
+// Creates singular tile/squate for the board
 function createTile(color, row, col) {
   const tile = document.createElement("div");
   tile.classList.add("tile");
@@ -25,7 +25,7 @@ function createTile(color, row, col) {
   return tile;
 }
 
-// Creates 8x8 board
+// Creates/Generates data for the 8x8 board
 function generateBoardData(){
   for (let row = 0; row < gridSize; row++) {
     const currrentRow = [];
@@ -38,5 +38,18 @@ function generateBoardData(){
   }
 }
 
+function renderBoard(){
+  board.innerHTML = "";
+  for(let row = 0; row < gridSize; row++){
+    for(let col = 0; col < gridSize; col++){
+      const color = boardData[row][col];
+      const tile = createTile(color, row, col);
+      board.appendChild(tile);
+    }
+
+  }
+}
+
 // Start
-createBoard();
+generateBoardData();
+renderBoard();
