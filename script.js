@@ -77,6 +77,12 @@ function renderBoard(){
 \*******************/
 
 function tileClick(tile){
+  if(selectedTile === tile){
+    tile.classList.remove("selected");
+    selectedTile = null;
+    return;
+  }
+
   if(selectedTile){
     selectedTile.classList.remove("selected");
   }
