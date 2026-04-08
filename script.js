@@ -1,3 +1,7 @@
+/***********\
+| Game data |
+\***********/
+
 const board = document.getElementById("board");
 
 const gridSize = 8;
@@ -13,20 +17,34 @@ const tileTypes = [
 
 const boardData = [];
 
+let selectedTile = null;
+
+/***************\
+| Tile creation |
+\***************/
+
 // Creates singular tile/squate for the board
 function createTile(color, row, col) {
   const tile = document.createElement("div");
   tile.classList.add("tile");
   tile.style.backgroundColor = color;
 
+  //Storing positions
   tile.dataset.row = row;
   tile.dataset.col = col;
+
+  tile.addEventListener("click", () => tileClick(tile))
 
   return tile;
 }
 
+/***************************\
+| Board creation/generation |
+\***************************/
+
 // Creates/Generates data for the 8x8 board
 function generateBoardData(){
+  boardData.length = 0;
   for (let row = 0; row < gridSize; row++) {
     const currrentRow = [];
 
@@ -37,6 +55,10 @@ function generateBoardData(){
     boardData.push(currrentRow)
   }
 }
+
+/*****************\
+| Board Rendering |
+\*****************/
 
 function renderBoard(){
   board.innerHTML = "";
@@ -50,6 +72,26 @@ function renderBoard(){
   }
 }
 
-// Start
+/*******************\
+| User Interactions |
+\*******************/
+
+function tileClick(tile){
+  if(selectedTile === tile){
+    tile.classList.remove("selected");
+    selectedTile = null;
+    return;
+  }
+
+  if(selectedTile){
+    selectedTile.classList.remove("selected");
+  }
+  selectedTile = tile;
+  tile.classList.add("selected");
+}
+
+/**********************\
+| Start/Initialisation |
+\**********************/
 generateBoardData();
 renderBoard();

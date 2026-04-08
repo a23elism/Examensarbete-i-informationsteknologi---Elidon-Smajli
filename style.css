@@ -45,3 +45,9 @@ body {
 .tile:hover {
   transform: scale(1.03);
 }
+
+.tile.selected {
+  border: none;
+  outline: 1px solid white;
+  transform: scale(1.1);
+}
