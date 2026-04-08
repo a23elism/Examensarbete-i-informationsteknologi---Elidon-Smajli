@@ -17,6 +17,8 @@ const tileTypes = [
 
 const boardData = [];
 
+let selectedTile = null;
+
 /***************\
 | Tile creation |
 \***************/
@@ -30,6 +32,8 @@ function createTile(color, row, col) {
   //Storing positions
   tile.dataset.row = row;
   tile.dataset.col = col;
+
+  tile.addEventListener("click", () => tileClick(tile))
 
   return tile;
 }
@@ -66,6 +70,18 @@ function renderBoard(){
     }
 
   }
+}
+
+/*******************\
+| User Interactions |
+\*******************/
+
+function tileClick(tile){
+  if(selectedTile){
+    selectedTile.classList.remove("selected");
+  }
+  selectedTile = tile;
+  tile.classList.add("selected");
 }
 
 /**********************\
