@@ -1,3 +1,7 @@
+/***********\
+| Game data |
+\***********/
+
 const board = document.getElementById("board");
 
 const gridSize = 8;
@@ -13,20 +17,30 @@ const tileTypes = [
 
 const boardData = [];
 
+/***************\
+| Tile creation |
+\***************/
+
 // Creates singular tile/squate for the board
 function createTile(color, row, col) {
   const tile = document.createElement("div");
   tile.classList.add("tile");
   tile.style.backgroundColor = color;
 
+  //Storing positions
   tile.dataset.row = row;
   tile.dataset.col = col;
 
   return tile;
 }
 
+/***************************\
+| Board creation/generation |
+\***************************/
+
 // Creates/Generates data for the 8x8 board
 function generateBoardData(){
+  boardData.length = 0;
   for (let row = 0; row < gridSize; row++) {
     const currrentRow = [];
 
@@ -37,6 +51,10 @@ function generateBoardData(){
     boardData.push(currrentRow)
   }
 }
+
+/*****************\
+| Board Rendering |
+\*****************/
 
 function renderBoard(){
   board.innerHTML = "";
@@ -50,6 +68,8 @@ function renderBoard(){
   }
 }
 
-// Start
+/**********************\
+| Start/Initialisation |
+\**********************/
 generateBoardData();
 renderBoard();
