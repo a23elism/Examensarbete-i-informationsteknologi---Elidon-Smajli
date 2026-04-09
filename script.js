@@ -83,9 +83,22 @@ function tileClick(tile){
     return;
   }
 
-  if(selectedTile){
-    selectedTile.classList.remove("selected");
+  if(!selectedTile){
+    selectedTile = tile;
+    tile.classList.add("selected");
+    return;
   }
+
+  const orgTile = selectedTile;
+
+  if (areAdjacent(orgTile, tile)) {
+    tileSwap (orgTile, tile);
+    selectedTile = null;
+    renderBoard();
+    return;
+  }
+
+  orgTile.classList.remove("selected");
   selectedTile = tile;
   tile.classList.add("selected");
 }
