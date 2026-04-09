@@ -106,6 +106,17 @@ function areAdjacent(tileA, tileB){
   return rowDiff + colDiff === 1;
 }
 
+function tileSwap(tileA, tileB){
+  const rowA = parseInt(tileA.dataset.row);
+  const rowB = parseInt(tileB.dataset.row);
+  const colA = parseInt(tileA.dataset.col);
+  const colB = parseInt(tileB.dataset.col);
+
+  const temp = boardData[rowA][colA];
+  boardData[rowA][colA] = boardData[rowB][colB];
+  boardData[rowB][colB] = temp;
+}
+
 /**********************\
 | Start/Initialisation |
 \**********************/
