@@ -90,6 +90,22 @@ function tileClick(tile){
   tile.classList.add("selected");
 }
 
+/***********\
+| Tile Swap |
+\***********/
+
+function areAdjacent(tileA, tileB){
+  const rowA = parseInt(tileA.dataset.row);
+  const rowB = parseInt(tileB.dataset.row);
+  const colA = parseInt(tileA.dataset.col);
+  const colB = parseInt(tileB.dataset.col);
+
+  const rowDiff = Math.abs(rowA - rowB);
+  const colDiff = Math.abs(colA - colB);
+  
+  return rowDiff + colDiff === 1;
+}
+
 /**********************\
 | Start/Initialisation |
 \**********************/
