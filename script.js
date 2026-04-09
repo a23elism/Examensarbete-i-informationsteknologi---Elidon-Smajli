@@ -83,11 +83,51 @@ function tileClick(tile){
     return;
   }
 
-  if(selectedTile){
-    selectedTile.classList.remove("selected");
+  if(!selectedTile){
+    selectedTile = tile;
+    tile.classList.add("selected");
+    return;
   }
+
+  const orgTile = selectedTile;
+
+  if (areAdjacent(orgTile, tile)) {
+    tileSwap (orgTile, tile);
+    selectedTile = null;
+    renderBoard();
+    return;
+  }
+
+  orgTile.classList.remove("selected");
   selectedTile = tile;
   tile.classList.add("selected");
+}
+
+/***********\
+| Tile Swap |
+\***********/
+
+function areAdjacent(tileA, tileB){
+  const rowA = parseInt(tileA.dataset.row);
+  const rowB = parseInt(tileB.dataset.row);
+  const colA = parseInt(tileA.dataset.col);
+  const colB = parseInt(tileB.dataset.col);
+
+  const rowDiff = Math.abs(rowA - rowB);
+  const colDiff = Math.abs(colA - colB);
+  
+  return rowDiff + colDiff === 1;
+}
+
+function tileSwap(tileA, tileB){
+  const rowA = parseInt(tileA.dataset.row);
+  const rowB = parseInt(tileB.dataset.row);
+  const colA = parseInt(tileA.dataset.col);
+  const colB = parseInt(tileB.dataset.col);
+
+  const temp = boardData[rowA][colA];
+  boardData[rowA][colA] = boardData[rowB][colB];
+  boardData[rowB][colB] = temp;
 }
 
 /**********************\
