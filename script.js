@@ -27,13 +27,17 @@ let selectedTile = null;
 function createTile(color, row, col) {
   const tile = document.createElement("div");
   tile.classList.add("tile");
-  tile.style.backgroundColor = color;
 
   //Storing positions
   tile.dataset.row = row;
   tile.dataset.col = col;
 
-  tile.addEventListener("click", () => tileClick(tile))
+  if(color !== null) {
+      tile.style.backgroundColor = color;
+      tile.addEventListener("click", () => tileClick(tile))
+  } else {
+    tile.classList.add("empty");
+  }
 
   return tile;
 }
@@ -93,6 +97,12 @@ function tileClick(tile){
 
   if (areAdjacent(orgTile, tile)) {
     tileSwap (orgTile, tile);
+
+    const matches = matchCheck();
+    if(matches.length > 0){
+      removeMatch(matches);
+    }
+
     selectedTile = null;
     renderBoard();
     return;
@@ -128,6 +138,76 @@ function tileSwap(tileA, tileB){
   const temp = boardData[rowA][colA];
   boardData[rowA][colA] = boardData[rowB][colB];
   boardData[rowB][colB] = temp;
+}
+
+/****************\
+| Match Checking |
+\****************/
+
+function matchCheck() {
+  const matchPos = [];
+
+  /************\
+  | Horizontal |
+  \************/
+  for(let row = 0; row < gridSize; row++) {
+    let count = 1;
+    for(let col = 1; col < gridSize; col++) {
+      const currrent = boardData[row][col];
+      const previous = boardData[row][col - 1];
+
+      if(currrent !== null && currrent === previous) {
+        count++;
+      } else{
+        if(count >= 3){
+          for(let i = 0; i < count; i++){
+            matchPos.push([row, col - 1 - i]);
+          }
+        }
+        count = 1;
+      }
+    }
+    if(count >= 3) {
+      for(let i = 0; i < count; i++) {
+        matchPos.push([row, gridSize - 1 - i]);
+      }
+    }
+  }
+
+  /**********\
+  | Vertical |
+  \**********/
+  for(let col = 0; col < gridSize; col++) {
+    let count = 1;
+    for(let row = 1; row < gridSize; row++) {
+      const currrent = boardData[row][col];
+      const previous = boardData[row - 1][col];
+
+      if(currrent !== null && currrent === previous){
+        count++;
+      } else{
+        if(count >= 3){
+          for(let i = 0; i < count; i++){
+            matchPos.push([row - 1 - i, col]);
+          }
+        }
+        count = 1;
+      }
+    }
+    if(count >= 3){
+      for(let i = 0; i < count; i++){
+        matchPos.push([gridSize - 1 - i, col])
+      }
+    }
+  }
+
+  return matchPos;
+}
+
+function removeMatch(match){
+  for(const [row, col] of match){
+    boardData[row][col] = null;
+  }
 }
 
 /**********************\
