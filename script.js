@@ -97,6 +97,12 @@ function tileClick(tile){
 
   if (areAdjacent(orgTile, tile)) {
     tileSwap (orgTile, tile);
+
+    const matches = matchCheck();
+    if(matches.length > 0){
+      removeMatch(matches);
+    }
+
     selectedTile = null;
     renderBoard();
     return;
@@ -150,7 +156,7 @@ function matchCheck() {
       const currrent = boardData[row][col];
       const previous = boardData[row][col - 1];
 
-      if(currrent !== null && currrent == previous) {
+      if(currrent !== null && currrent === previous) {
         count++;
       } else{
         if(count >= 3){
