@@ -168,6 +168,34 @@ function matchCheck() {
     }
   }
   
+  /**********\
+  | Vertical |
+  \**********/
+  for(let col = 0; col < gridSize; col++) {
+    let count = 1;
+    for(let row = 1; row < gridSize; row++) {
+      const currrent = boardData[row][col];
+      const previous = boardData[row - 1][col];
+
+      if(currrent !== null && currrent === previous){
+        count++;
+      } else{
+        if(count >= 3){
+          for(let i = 0; i < count; i++){
+            matchPos.push([row - 1 - i, col]);
+          }
+        }
+        count = 1;
+      }
+    }
+    if(count >= 3){
+      for(let i = 0; i < count; i++){
+        matchPos.push([gridSize - 1 - i, col])
+      }
+    }
+  }
+
+  return matchPos;
 }
 
 /**********************\
