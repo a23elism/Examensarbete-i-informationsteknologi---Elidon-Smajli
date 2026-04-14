@@ -27,13 +27,17 @@ let selectedTile = null;
 function createTile(color, row, col) {
   const tile = document.createElement("div");
   tile.classList.add("tile");
-  tile.style.backgroundColor = color;
 
   //Storing positions
   tile.dataset.row = row;
   tile.dataset.col = col;
 
-  tile.addEventListener("click", () => tileClick(tile))
+  if(color !== null) {
+      tile.style.backgroundColor = color;
+      tile.addEventListener("click", () => tileClick(tile))
+  } else {
+    tile.classList.add("empty");
+  }
 
   return tile;
 }
