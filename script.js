@@ -167,7 +167,7 @@ function matchCheck() {
       }
     }
   }
-  
+
   /**********\
   | Vertical |
   \**********/
@@ -196,6 +196,12 @@ function matchCheck() {
   }
 
   return matchPos;
+}
+
+function removeMatch(match){
+  for(const [row, col] of match){
+    boardData[row][col] = null;
+  }
 }
 
 /**********************\
