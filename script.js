@@ -134,6 +134,42 @@ function tileSwap(tileA, tileB){
   boardData[rowB][colB] = temp;
 }
 
+/****************\
+| Match Checking |
+\****************/
+
+function matchCheck() {
+  const matchPos = [];
+
+  /************\
+  | Horizontal |
+  \************/
+  for(let row = 0; row < gridSize; row++) {
+    let count = 1;
+    for(let col = 1; col < gridSize; col++) {
+      const currrent = boardData[row][col];
+      const previous = boardData[row][col - 1];
+
+      if(currrent !== null && currrent == previous) {
+        count++;
+      } else{
+        if(count >= 3){
+          for(let i = 0; i < count; i++){
+            matchPos.push([row, col - 1 - i]);
+          }
+        }
+        count = 1;
+      }
+    }
+    if(count >= 3) {
+      for(let i = 0; i < count; i++) {
+        matchPos.push([row, gridSize - 1 - i]);
+      }
+    }
+  }
+  
+}
+
 /**********************\
 | Start/Initialisation |
 \**********************/
