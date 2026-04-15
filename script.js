@@ -99,8 +99,11 @@ function tileClick(tile){
     tileSwap (orgTile, tile);
 
     const matches = matchCheck();
-    if(matches.length > 0){
+    while(matches.length > 0){
       removeMatch(matches);
+      tileFall();
+      refillTiles();
+      matches = matchCheck();
     }
 
     selectedTile = null;
@@ -250,4 +253,11 @@ function refillTiles(){
 | Start/Initialisation |
 \**********************/
 generateBoardData();
+let matches = matchCheck();
+while(matches.length > 0){
+  removeMatch(matches);
+  tileFall();
+  refillTiles();
+  matches = matchCheck();
+}
 renderBoard();
