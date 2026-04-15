@@ -210,6 +210,27 @@ function removeMatch(match){
   }
 }
 
+/***********\
+| Tile Fall |
+\***********/
+
+function tileFall(){
+  for(let col = 0; col < gridSize; col++){
+    let emptyRow = gridSize - 1;
+    
+    for(let row = gridSize - 1; row >= 0; row--){
+      if(boardData[row][col] !== null){
+        boardData[emptyRow][col] = boardData[row][col];
+
+        if(emptyRow !== row){
+          boardData[row][col] = null;
+        }
+        emptyRow--;
+      }
+    }
+  }
+}
+
 /**********************\
 | Start/Initialisation |
 \**********************/
