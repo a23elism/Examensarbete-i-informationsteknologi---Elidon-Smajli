@@ -231,6 +231,21 @@ function tileFall(){
   }
 }
 
+/*************\
+| Tile Refill |
+\*************/
+
+function refillTiles(){
+  for(let row = 0; row < gridSize; row++){
+    for(let col = 0; col < gridSize; col++){
+      if(boardData[row][col] === null){
+        const randomColor = tileTypes[Math.floor(Math.random() * tileTypes.length)];
+        boardData[row][col] = randomColor;
+      }
+    }
+  }
+}
+
 /**********************\
 | Start/Initialisation |
 \**********************/
