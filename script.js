@@ -98,7 +98,7 @@ function tileClick(tile){
   if (areAdjacent(orgTile, tile)) {
     tileSwap (orgTile, tile);
 
-    const matches = matchCheck();
+    let matches = matchCheck();
     while(matches.length > 0){
       removeMatch(matches);
       tileFall();
