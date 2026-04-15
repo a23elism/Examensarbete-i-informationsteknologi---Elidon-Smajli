@@ -99,8 +99,11 @@ function tileClick(tile){
     tileSwap (orgTile, tile);
 
     const matches = matchCheck();
-    if(matches.length > 0){
+    while(matches.length > 0){
       removeMatch(matches);
+      tileFall();
+      refillTiles();
+      matches = matchCheck();
     }
 
     selectedTile = null;
@@ -210,8 +213,51 @@ function removeMatch(match){
   }
 }
 
+/***********\
+| Tile Fall |
+\***********/
+
+function tileFall(){
+  for(let col = 0; col < gridSize; col++){
+    let emptyRow = gridSize - 1;
+    
+    for(let row = gridSize - 1; row >= 0; row--){
+      if(boardData[row][col] !== null){
+        boardData[emptyRow][col] = boardData[row][col];
+
+        if(emptyRow !== row){
+          boardData[row][col] = null;
+        }
+        emptyRow--;
+      }
+    }
+  }
+}
+
+/*************\
+| Tile Refill |
+\*************/
+
+function refillTiles(){
+  for(let row = 0; row < gridSize; row++){
+    for(let col = 0; col < gridSize; col++){
+      if(boardData[row][col] === null){
+        const randomColor = tileTypes[Math.floor(Math.random() * tileTypes.length)];
+        boardData[row][col] = randomColor;
+      }
+    }
+  }
+}
+
 /**********************\
 | Start/Initialisation |
 \**********************/
 generateBoardData();
+let matches = matchCheck();
+while(matches.length > 0){
+  removeMatch(matches);
+  tileFall();
+  refillTiles();
+  matches = matchCheck();
+}
 renderBoard();
