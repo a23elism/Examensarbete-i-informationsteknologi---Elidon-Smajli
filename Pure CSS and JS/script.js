@@ -26,7 +26,8 @@ let selectedTile = null;
 // Creates singular tile/squate for the board
 function createTile(color, row, col) {
   const tile = document.createElement("div");
-  tile.classList.add("tile");
+  tile.classList.add("tile","idle");
+  tile.style.animationDelay = `${Math.random()*2}s`
 
   //Storing positions
   tile.dataset.row = row;
@@ -83,6 +84,7 @@ function renderBoard(){
 function tileClick(tile){
   if(selectedTile === tile){
     tile.classList.remove("selected");
+    tile.classList.add("idle");
     selectedTile = null;
     return;
   }
@@ -90,6 +92,7 @@ function tileClick(tile){
   if(!selectedTile){
     selectedTile = tile;
     tile.classList.add("selected");
+    tile.classList.remove("idle");
     return;
   }
 
