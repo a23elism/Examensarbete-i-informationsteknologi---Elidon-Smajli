@@ -67,14 +67,29 @@ function generateBoardData(){
 
 function renderBoard(){
   board.innerHTML = "";
+
   for(let row = 0; row < gridSize; row++){
     for(let col = 0; col < gridSize; col++){
-      const color = boardData[row][col];
-      const tile = createTile(color, row, col);
+      const tile = createTile(boardData[row][col], row, col);
       board.appendChild(tile);
     }
-
   }
+}
+
+function updateTileVisual(tile, value) {
+  tile.style.backgroundColor = value !== null ? value : "";
+  tile.classList.toggle("empty", value === null);
+}
+
+function refreshBoardVisuals() {
+  const tiles = document.querySelectorAll(".tile");
+
+  tiles.forEach(tile => {
+    const row = parseInt(tile.dataset.row);
+    const col = parseInt(tile.dataset.col);
+
+    updateTileVisual(tile, boardData[row][col]);
+  });
 }
 
 /*******************\
@@ -98,19 +113,21 @@ function tileClick(tile){
 
   const orgTile = selectedTile;
 
-  if (areAdjacent(orgTile, tile)) {
-    tileSwap (orgTile, tile);
+  if(areAdjacent(orgTile, tile)) {
+    tileSwap(orgTile, tile);
 
     let matches = matchCheck();
-    while(matches.length > 0){
+    while (matches.length > 0) {
       removeMatch(matches);
       tileFall();
       refillTiles();
       matches = matchCheck();
     }
 
+    orgTile.classList.remove("selected");
+    tile.classList.remove("selected");
     selectedTile = null;
-    renderBoard();
+    refreshBoardVisuals();
     return;
   }
 
