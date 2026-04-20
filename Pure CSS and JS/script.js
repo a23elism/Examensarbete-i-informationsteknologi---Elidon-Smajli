@@ -186,13 +186,18 @@ function tileClick(tile){
       setTimeout(() => {
         while (matches.length > 0) {
           removeMatch(matches);
-          tileFall();
-          refillTiles();
+          const fallenTiles = tileFall();
+          const newTiles = refillTiles();
+
+          animateFall([...fallenTiles, ...newTiles]);
+
           matches = matchCheck();
         }
         selectedTile = null;
-        refreshBoardVisuals();
-        isAnimating = false;
+        setTimeout(() => {
+          refreshBoardVisuals();
+          isAnimating = false;
+        }, 300);
       }, 450);
 
       return;
@@ -346,14 +351,13 @@ function refillTiles(){
   const newTiles = [];
   for (let col = 0; col < gridSize; col++){
     let spawnOffset = 0;
-    
     for (let row = gridSize - 1; row >= 0; row--){
       if (boardData[row][col] === null){
         const randomColor = tileTypes[Math.floor(Math.random() * tileTypes.length)];
         boardData[row][col] = randomColor;
         newTiles.push({
           color: randomColor,
-          fromRow: -1 - spawnOffset,
+          fromRow: spawnOffset,
           toRow: row,
           col: col,
           isNew: true
@@ -453,6 +457,51 @@ function animateMatch(matchPositions) {
       explodeTile(tile, color);
     }
   }
+}
+
+/*---------------*\
+| Fall Animation |
+\*---------------*/
+
+function animateFall(fallingData){
+  fallingData.forEach(item => {
+    if (!item.isNew) {
+      const originalTile = document.querySelector(
+        `.tile[data-row="${item.fromRow}"][data-col="${item.col}"]`
+      );
+
+      if (originalTile) {
+        originalTile.style.visibility = "hidden";
+      }
+    }
+
+    const piece = document.createElement("div");
+    piece.classList.add("clone");
+
+    piece.style.width = "64px";
+    piece.style.height = "64px";
+    piece.style.borderRadius = "12px";
+    piece.style.border = "2px solid grey";
+    piece.style.backgroundColor = item.color;
+
+    const tileSize = 64;
+    const gap = 4;
+    const padding = 8;
+    const step = tileSize + gap;
+
+    piece.style.left = `${padding + item.col * step}px`;
+    piece.style.top = `${padding + item.fromRow * step}px`;
+
+    board.appendChild(piece);
+
+    requestAnimationFrame(() => {
+      piece.style.transform = `translateY(${(item.toRow - item.fromRow) * step}px)`;
+    });
+
+    setTimeout(() => {
+      piece.remove();
+    }, 300);
+  });
 }
 
 /**********************\
