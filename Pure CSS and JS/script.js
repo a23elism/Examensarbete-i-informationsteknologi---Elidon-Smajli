@@ -18,11 +18,15 @@ const tileTypes = [
 const boardData = [];
 
 let selectedTile = null;
+let isAnimating = false;
 
 /***************\
 | Tile creation |
 \***************/
 
+/*------*\
+| Normal |
+\*------*/
 // Creates singular tile/squate for the board
 function createTile(color, row, col) {
   const tile = document.createElement("div");
@@ -41,6 +45,49 @@ function createTile(color, row, col) {
   }
 
   return tile;
+}
+
+/*-----*\
+| Clone |
+\*-----*/
+
+function createTileClone(tile) {
+  const rect = tile.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+
+  const clone = tile.cloneNode(true);
+  clone.classList.remove("selected", "idle", "swap");
+  clone.classList.add("clone");
+
+  clone.style.width = `${rect.width}px`;
+  clone.style.height = `${rect.height}px`;
+  clone.style.left = `${rect.left - boardRect.left}px`;
+  clone.style.top = `${rect.top - boardRect.top}px`;
+
+  board.appendChild(clone);
+  return clone;
+}
+
+/*-----*\
+| Match |
+\*-----*/
+
+function createMatchTile(tile, color){
+  const tileRect = tile.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+
+  const piece = document.createElement("div");
+  piece.classList.add("explodeTile");
+
+  piece.style.width = `${tileRect.width / 2}px`;
+  piece.style.height = `${tileRect.height / 2}px`;
+  piece.style.backgroundColor = color;
+
+  piece.style.left = `${tileRect.left - boardRect.left + tileRect.width / 4}px`;
+  piece.style.top = `${tileRect.top - boardRect.top + tileRect.height / 4}px`;
+
+  board.appendChild(piece);
+  return piece;
 }
 
 /***************************\
@@ -79,6 +126,13 @@ function renderBoard(){
 function updateTileVisual(tile, value) {
   tile.style.backgroundColor = value !== null ? value : "";
   tile.classList.toggle("empty", value === null);
+
+  tile.classList.remove("matched");
+  tile.style.visibility = "visible";
+
+  if (!tile.classList.contains("selected")) {
+    tile.classList.add("idle");
+  }
 }
 
 function refreshBoardVisuals() {
@@ -97,6 +151,7 @@ function refreshBoardVisuals() {
 \*******************/
 
 function tileClick(tile){
+  if (isAnimating) return;
   if(selectedTile === tile){
     tile.classList.remove("selected");
     tile.classList.add("idle");
@@ -113,23 +168,30 @@ function tileClick(tile){
 
   const orgTile = selectedTile;
 
-  if(areAdjacent(orgTile, tile)) {
-    tileSwap(orgTile, tile);
+  if (areAdjacent(orgTile, tile)) {
+  isAnimating = true;
 
+  orgTile.classList.remove("selected", "idle");
+  tile.classList.remove("selected", "idle");
+
+  swapAnimation(orgTile, tile);
+
+  setTimeout(() => {
+    tileSwap(orgTile, tile);
+    refreshBoardVisuals();
     let matches = matchCheck();
-    while (matches.length > 0) {
-      removeMatch(matches);
-      tileFall();
-      refillTiles();
-      matches = matchCheck();
+
+    if (matches.length > 0) {
+      allMatches(matches);
+      return;
     }
 
-    orgTile.classList.remove("selected");
-    tile.classList.remove("selected");
     selectedTile = null;
-    refreshBoardVisuals();
-    return;
-  }
+    isAnimating = false;
+  }, 200);
+
+  return;
+}
 
   orgTile.classList.remove("selected");
   selectedTile = tile;
@@ -238,11 +300,20 @@ function removeMatch(match){
 \***********/
 
 function tileFall(){
+  const fallingTiles = [];
   for(let col = 0; col < gridSize; col++){
     let emptyRow = gridSize - 1;
-    
     for(let row = gridSize - 1; row >= 0; row--){
-      if(boardData[row][col] !== null){
+      if (boardData[row][col] !== null) {
+        if (emptyRow !== row){
+          fallingTiles.push({
+            color: boardData[row][col],
+            fromRow: row,
+            toRow: emptyRow,
+            col: col,
+            isNew: false
+          });
+        } 
         boardData[emptyRow][col] = boardData[row][col];
 
         if(emptyRow !== row){
@@ -252,6 +323,7 @@ function tileFall(){
       }
     }
   }
+  return fallingTiles;
 }
 
 /*************\
@@ -259,14 +331,187 @@ function tileFall(){
 \*************/
 
 function refillTiles(){
-  for(let row = 0; row < gridSize; row++){
-    for(let col = 0; col < gridSize; col++){
-      if(boardData[row][col] === null){
+  const newTiles = [];
+  for (let col = 0; col < gridSize; col++){
+    let spawnOffset = 0;
+    for (let row = gridSize - 1; row >= 0; row--){
+      if (boardData[row][col] === null){
         const randomColor = tileTypes[Math.floor(Math.random() * tileTypes.length)];
         boardData[row][col] = randomColor;
+        newTiles.push({
+          color: randomColor,
+          fromRow: 0,
+          toRow: row,
+          col: col,
+          isNew: true
+        });
+        spawnOffset++;
       }
     }
   }
+  return newTiles;
+}
+
+/*******************\
+| Animation Scripts |
+\*******************/
+
+/*--------------*\
+| Swap Animation |
+\*--------------*/
+
+function swapAnimation(tileA, tileB) {
+  const cloneA = createTileClone(tileA);
+  const cloneB = createTileClone(tileB);
+
+  const rowA = parseInt(tileA.dataset.row);
+  const rowB = parseInt(tileB.dataset.row);
+  const colA = parseInt(tileA.dataset.col);
+  const colB = parseInt(tileB.dataset.col);
+
+  const moveX = (colB - colA) * tileA.offsetWidth;
+  const moveY = (rowB - rowA) * tileA.offsetHeight;
+
+  tileA.style.visibility = "hidden";
+  tileB.style.visibility = "hidden";
+
+  requestAnimationFrame(() => {
+    cloneA.style.transform = `translate(${moveX}px, ${moveY}px)`;
+    cloneB.style.transform = `translate(${-moveX}px, ${-moveY}px)`;
+  });
+
+  setTimeout(() => {
+    cloneA.remove();
+    cloneB.remove();
+
+    tileA.style.visibility = "visible";
+    tileB.style.visibility = "visible";
+  }, 200);
+}
+
+function tileAnimationReset(tile){
+  tile.style.transform = "";
+  tile.classList.remove("selected","swap")
+  tile.classList.add("idle");
+}
+
+/*---------------*\
+| Match Animation |
+\*---------------*/
+
+function explodeTile(tile, color){
+  tile.classList.remove("idle", "selected");
+  tile.classList.add("matched");
+  tile.style.visibility = "hidden";
+
+  const pieces = [];
+
+  for (let i = 0; i < 4; i++) {
+    const piece = createMatchTile(tile, color);
+    pieces.push(piece);
+  }
+
+  requestAnimationFrame(() => {
+    pieces.forEach(piece => {
+      const moveX = (Math.random() - 0.5) * 180;
+      const moveY = (Math.random() - 0.5) * 180;
+      const rotate = (Math.random() - 0.5) * 360;
+
+      piece.style.transform =
+        `translate(${moveX}px, ${moveY}px) rotate(${rotate}deg) scale(0.4)`;
+      piece.style.opacity = "0";
+    });
+  });
+
+  setTimeout(() => {
+    pieces.forEach(piece => piece.remove());
+  }, 450);
+}
+
+function animateMatch(matchPositions) {
+  for (const [row, col] of matchPositions) {
+    const tile = document.querySelector(
+      `.tile[data-row="${row}"][data-col="${col}"]`
+    );
+
+    const color = boardData[row][col];
+
+    if (tile && color !== null) {
+      explodeTile(tile, color);
+    }
+  }
+}
+
+function allMatches(matches) {
+  if (matches.length === 0) {
+    selectedTile = null;
+    isAnimating = false;
+    refreshBoardVisuals();
+    return;
+  }
+
+  animateMatch(matches);
+
+  setTimeout(() => {
+    removeMatch(matches);
+
+    const fallenTiles = tileFall();
+    const newTiles = refillTiles();
+
+    animateFall([...fallenTiles, ...newTiles]);
+
+    setTimeout(() => {
+      refreshBoardVisuals();
+
+      const newMatches = matchCheck();
+      allMatches(newMatches);
+    }, 300);
+  }, 450);
+}
+
+/*---------------*\
+| Fall Animation |
+\*---------------*/
+
+function animateFall(fallingData){
+  fallingData.forEach(item => {
+    if (!item.isNew) {
+      const originalTile = document.querySelector(
+        `.tile[data-row="${item.fromRow}"][data-col="${item.col}"]`
+      );
+
+      if (originalTile) {
+        originalTile.style.visibility = "hidden";
+      }
+    }
+
+    const piece = document.createElement("div");
+    piece.classList.add("clone");
+
+    piece.style.width = "64px";
+    piece.style.height = "64px";
+    piece.style.borderRadius = "12px";
+    piece.style.border = "2px solid grey";
+    piece.style.backgroundColor = item.color;
+
+    const tileSize = 64;
+    const gap = 4;
+    const padding = 8;
+    const step = tileSize + gap;
+
+    piece.style.left = `${padding + item.col * step}px`;
+    piece.style.top = `${padding + item.fromRow * step}px`;
+
+    board.appendChild(piece);
+
+    requestAnimationFrame(() => {
+      piece.style.transform = `translateY(${(item.toRow - item.fromRow) * step}px)`;
+    });
+
+    setTimeout(() => {
+      piece.remove();
+    }, 300);
+  });
 }
 
 /**********************\
