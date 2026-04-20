@@ -24,6 +24,9 @@ let isAnimating = false;
 | Tile creation |
 \***************/
 
+/*------*\
+| Normal |
+\*------*/
 // Creates singular tile/squate for the board
 function createTile(color, row, col) {
   const tile = document.createElement("div");
@@ -44,6 +47,10 @@ function createTile(color, row, col) {
   return tile;
 }
 
+/*-----*\
+| Clone |
+\*-----*/
+
 function createTileClone(tile) {
   const rect = tile.getBoundingClientRect();
   const boardRect = board.getBoundingClientRect();
@@ -60,6 +67,10 @@ function createTileClone(tile) {
   board.appendChild(clone);
   return clone;
 }
+
+/*-----*\
+| Match |
+\*-----*/
 
 /***************************\
 | Board creation/generation |
