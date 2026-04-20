@@ -127,6 +127,9 @@ function updateTileVisual(tile, value) {
   tile.style.backgroundColor = value !== null ? value : "";
   tile.classList.toggle("empty", value === null);
 
+  tile.classList.remove("matched");
+  tile.style.visibility = "visible";
+
   if (!tile.classList.contains("selected")) {
     tile.classList.add("idle");
   }
@@ -174,13 +177,24 @@ function tileClick(tile){
 
   setTimeout(() => {
     tileSwap(orgTile, tile);
-
     let matches = matchCheck();
-    while (matches.length > 0) {
-      removeMatch(matches);
-      tileFall();
-      refillTiles();
-      matches = matchCheck();
+
+    if (matches.length > 0) {
+      animateMatch(matches);
+
+      setTimeout(() => {
+        while (matches.length > 0) {
+          removeMatch(matches);
+          tileFall();
+          refillTiles();
+          matches = matchCheck();
+        }
+        selectedTile = null;
+        refreshBoardVisuals();
+        isAnimating = false;
+      }, 450);
+
+      return;
     }
 
     selectedTile = null;
@@ -379,6 +393,7 @@ function tileAnimationReset(tile){
 function explodeTile(tile){
   tile.classList.remove("idle", "selected");
   tile.classList.add("matched");
+  tile.style.visibility = "hidden";
 
   const pieces = [];
 
