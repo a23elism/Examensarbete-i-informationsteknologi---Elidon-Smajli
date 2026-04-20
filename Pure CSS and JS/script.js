@@ -151,6 +151,7 @@ function refreshBoardVisuals() {
 \*******************/
 
 function tileClick(tile){
+  if (isAnimating) return;
   if(selectedTile === tile){
     tile.classList.remove("selected");
     tile.classList.add("idle");
@@ -181,25 +182,7 @@ function tileClick(tile){
     let matches = matchCheck();
 
     if (matches.length > 0) {
-      animateMatch(matches);
-
-      setTimeout(() => {
-        while (matches.length > 0) {
-          removeMatch(matches);
-          const fallenTiles = tileFall();
-          const newTiles = refillTiles();
-
-          animateFall([...fallenTiles, ...newTiles]);
-
-          matches = matchCheck();
-        }
-        selectedTile = null;
-        setTimeout(() => {
-          refreshBoardVisuals();
-          isAnimating = false;
-        }, 300);
-      }, 450);
-
+      allMatches(matches);
       return;
     }
 
@@ -457,6 +440,33 @@ function animateMatch(matchPositions) {
       explodeTile(tile, color);
     }
   }
+}
+
+function allMatches(matches) {
+  if (matches.length === 0) {
+    selectedTile = null;
+    isAnimating = false;
+    refreshBoardVisuals();
+    return;
+  }
+
+  animateMatch(matches);
+
+  setTimeout(() => {
+    removeMatch(matches);
+
+    const fallenTiles = tileFall();
+    const newTiles = refillTiles();
+
+    animateFall([...fallenTiles, ...newTiles]);
+
+    setTimeout(() => {
+      refreshBoardVisuals();
+
+      const newMatches = matchCheck();
+      allMatches(newMatches);
+    }, 300);
+  }, 450);
 }
 
 /*---------------*\
