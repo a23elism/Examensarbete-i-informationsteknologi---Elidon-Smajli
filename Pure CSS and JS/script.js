@@ -312,11 +312,20 @@ function removeMatch(match){
 \***********/
 
 function tileFall(){
+  const fallingTiles = [];
   for(let col = 0; col < gridSize; col++){
     let emptyRow = gridSize - 1;
-    
     for(let row = gridSize - 1; row >= 0; row--){
-      if(boardData[row][col] !== null){
+      if (boardData[row][col] !== null) {
+        if (emptyRow !== row){
+          fallingTiles.push({
+            color: boardData[row][col],
+            fromRow: row,
+            toRow: emptyRow,
+            col: col,
+            isNew: false
+          });
+        } 
         boardData[emptyRow][col] = boardData[row][col];
 
         if(emptyRow !== row){
@@ -326,6 +335,7 @@ function tileFall(){
       }
     }
   }
+  return fallingTiles;
 }
 
 /*************\
