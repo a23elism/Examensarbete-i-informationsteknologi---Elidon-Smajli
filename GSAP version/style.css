@@ -23,6 +23,7 @@ body {
 }
 
 #board {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(8, 64px);
   grid-template-rows: repeat(8, 64px);
@@ -32,6 +33,10 @@ body {
   border: 2px solid #555;
   border-radius: 10px;
 }
+
+/*****************\
+| Tile attributes |
+\*****************/
 
 .tile {
   width: 64px;
@@ -56,4 +61,43 @@ body {
   background: transparent;
   border: 2px dashed rgba(255, 255, 255, 0.08);
   cursor: default;
+}
+
+.tile.idle {
+ animation: idle 2.5s ease-in-out infinite;
+}
+
+.tile.matched {
+  visibility: hidden;
+}
+
+.clone {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+  transition: transform 0.2s ease;
+}
+
+.explodeTile {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2000;
+  border-radius: 8px;
+  transition: transform 0.45s ease-out, opacity 0.45s ease-out;
+}
+
+/************\
+| Animations |
+\************/
+
+@keyframes idle {
+  0%{
+    transform: translateY(0px) scale(1);
+  }
+  50%{
+    transform: translateY(-3px) scale(1.03);
+  }
+  100%{
+    transform: translateY(0px) scale(1);
+  }
 }
