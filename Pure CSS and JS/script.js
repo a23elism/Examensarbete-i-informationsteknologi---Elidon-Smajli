@@ -343,14 +343,26 @@ function tileFall(){
 \*************/
 
 function refillTiles(){
-  for(let row = 0; row < gridSize; row++){
-    for(let col = 0; col < gridSize; col++){
-      if(boardData[row][col] === null){
+  const newTiles = [];
+  for (let col = 0; col < gridSize; col++){
+    let spawnOffset = 0;
+    
+    for (let row = gridSize - 1; row >= 0; row--){
+      if (boardData[row][col] === null){
         const randomColor = tileTypes[Math.floor(Math.random() * tileTypes.length)];
         boardData[row][col] = randomColor;
+        newTiles.push({
+          color: randomColor,
+          fromRow: -1 - spawnOffset,
+          toRow: row,
+          col: col,
+          isNew: true
+        });
+        spawnOffset++;
       }
     }
   }
+  return newTiles;
 }
 
 /*******************\
