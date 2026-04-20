@@ -269,6 +269,26 @@ function refillTiles(){
   }
 }
 
+/*******************\
+| Animation Scripts |
+\*******************/
+
+function swapAnimation(tileA, tileB){
+  const rowA = parseInt(tileA.dataset.row);
+  const rowB = parseInt(tileB.dataset.row);
+  const colA = parseInt(tileA.dataset.col);
+  const colB = parseInt(tileB.dataset.col);
+
+  const moveX = (colB - colA) * tileA.offsetWidth;
+  const moveY = (rowB - rowA) * tileA.offsetHeight;
+
+  tileA.classList.add("swap");
+  tileB.classList.add("swap");
+
+  tileA.style.transform = `translate(${moveX}px, ${moveY}px)`;
+  tileB.style.transform = `translate(${-moveX}px, ${-moveY}px)`;
+}
+
 /**********************\
 | Start/Initialisation |
 \**********************/
