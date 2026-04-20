@@ -357,7 +357,7 @@ function refillTiles(){
         boardData[row][col] = randomColor;
         newTiles.push({
           color: randomColor,
-          fromRow: spawnOffset,
+          fromRow: 0,
           toRow: row,
           col: col,
           isNew: true
