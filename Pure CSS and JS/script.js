@@ -18,6 +18,7 @@ const tileTypes = [
 const boardData = [];
 
 let selectedTile = null;
+let isAnimating = false;
 
 /***************\
 | Tile creation |
@@ -41,6 +42,23 @@ function createTile(color, row, col) {
   }
 
   return tile;
+}
+
+function createTileClone(tile) {
+  const rect = tile.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+
+  const clone = tile.cloneNode(true);
+  clone.classList.remove("selected", "idle", "swap");
+  clone.classList.add("swap-clone");
+
+  clone.style.width = `${rect.width}px`;
+  clone.style.height = `${rect.height}px`;
+  clone.style.left = `${rect.left - boardRect.left}px`;
+  clone.style.top = `${rect.top - boardRect.top}px`;
+
+  board.appendChild(clone);
+  return clone;
 }
 
 /***************************\
@@ -79,6 +97,10 @@ function renderBoard(){
 function updateTileVisual(tile, value) {
   tile.style.backgroundColor = value !== null ? value : "";
   tile.classList.toggle("empty", value === null);
+
+  if (!tile.classList.contains("selected")) {
+    tile.classList.add("idle");
+  }
 }
 
 function refreshBoardVisuals() {
@@ -113,7 +135,15 @@ function tileClick(tile){
 
   const orgTile = selectedTile;
 
-  if(areAdjacent(orgTile, tile)) {
+  if (areAdjacent(orgTile, tile)) {
+  isAnimating = true;
+
+  orgTile.classList.remove("selected", "idle");
+  tile.classList.remove("selected", "idle");
+
+  swapAnimation(orgTile, tile);
+
+  setTimeout(() => {
     tileSwap(orgTile, tile);
 
     let matches = matchCheck();
@@ -124,12 +154,13 @@ function tileClick(tile){
       matches = matchCheck();
     }
 
-    orgTile.classList.remove("selected");
-    tile.classList.remove("selected");
     selectedTile = null;
     refreshBoardVisuals();
-    return;
-  }
+    isAnimating = false;
+  }, 200);
+
+  return;
+}
 
   orgTile.classList.remove("selected");
   selectedTile = tile;
@@ -273,7 +304,10 @@ function refillTiles(){
 | Animation Scripts |
 \*******************/
 
-function swapAnimation(tileA, tileB){
+function swapAnimation(tileA, tileB) {
+  const cloneA = createTileClone(tileA);
+  const cloneB = createTileClone(tileB);
+
   const rowA = parseInt(tileA.dataset.row);
   const rowB = parseInt(tileB.dataset.row);
   const colA = parseInt(tileA.dataset.col);
@@ -282,16 +316,27 @@ function swapAnimation(tileA, tileB){
   const moveX = (colB - colA) * tileA.offsetWidth;
   const moveY = (rowB - rowA) * tileA.offsetHeight;
 
-  tileA.classList.add("swap");
-  tileB.classList.add("swap");
+  tileA.style.visibility = "hidden";
+  tileB.style.visibility = "hidden";
 
-  tileA.style.transform = `translate(${moveX}px, ${moveY}px)`;
-  tileB.style.transform = `translate(${-moveX}px, ${-moveY}px)`;
+  requestAnimationFrame(() => {
+    cloneA.style.transform = `translate(${moveX}px, ${moveY}px)`;
+    cloneB.style.transform = `translate(${-moveX}px, ${-moveY}px)`;
+  });
+
+  setTimeout(() => {
+    cloneA.remove();
+    cloneB.remove();
+
+    tileA.style.visibility = "visible";
+    tileB.style.visibility = "visible";
+  }, 200);
 }
 
 function tileAnimationReset(tile){
   tile.style.transform = "";
   tile.classList.remove("selected","swap")
+  tile.classList.add("idle");
 }
 
 /**********************\

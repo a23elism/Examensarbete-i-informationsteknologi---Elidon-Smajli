@@ -23,6 +23,7 @@ body {
 }
 
 #board {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(8, 64px);
   grid-template-rows: repeat(8, 64px);
@@ -64,6 +65,13 @@ body {
 
 .tile.idle {
  animation: idle 2.5s ease-in-out infinite;
+}
+
+.swap-clone {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+  transition: transform 0.2s ease;
 }
 
 /************\
