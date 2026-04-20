@@ -57,7 +57,7 @@ function createTileClone(tile) {
 
   const clone = tile.cloneNode(true);
   clone.classList.remove("selected", "idle", "swap");
-  clone.classList.add("swap-clone");
+  clone.classList.add("clone");
 
   clone.style.width = `${rect.width}px`;
   clone.style.height = `${rect.height}px`;
@@ -375,6 +375,46 @@ function tileAnimationReset(tile){
 /*---------------*\
 | Match Animation |
 \*---------------*/
+
+function explodeTile(tile){
+  tile.classList.remove("idle", "selected");
+  tile.classList.add("matched");
+
+  const pieces = [];
+
+  for (let i = 0; i < 4; i++) {
+    const piece = createMatchTile(tile);
+    pieces.push(piece);
+  }
+
+  requestAnimationFrame(() => {
+    pieces.forEach(piece => {
+      const moveX = (Math.random() - 0.5) * 180;
+      const moveY = (Math.random() - 0.5) * 180;
+      const rotate = (Math.random() - 0.5) * 360;
+
+      piece.style.transform =
+        `translate(${moveX}px, ${moveY}px) rotate(${rotate}deg) scale(0.4)`;
+      piece.style.opacity = "0";
+    });
+  });
+
+  setTimeout(() => {
+    pieces.forEach(piece => piece.remove());
+  }, 450);
+}
+
+function animateMatch(matchPositions) {
+  for (const [row, col] of matchPositions) {
+    const tile = document.querySelector(
+      `.tile[data-row="${row}"][data-col="${col}"]`
+    );
+
+    if (tile) {
+      explodeTile(tile);
+    }
+  }
+}
 
 /**********************\
 | Start/Initialisation |

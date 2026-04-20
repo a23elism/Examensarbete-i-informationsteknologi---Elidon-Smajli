@@ -67,7 +67,7 @@ body {
  animation: idle 2.5s ease-in-out infinite;
 }
 
-.swap-clone {
+.clone {
   position: absolute;
   pointer-events: none;
   z-index: 1000;
