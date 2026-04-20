@@ -177,6 +177,7 @@ function tileClick(tile){
 
   setTimeout(() => {
     tileSwap(orgTile, tile);
+    refreshBoardVisuals();
     let matches = matchCheck();
 
     if (matches.length > 0) {
@@ -198,7 +199,6 @@ function tileClick(tile){
     }
 
     selectedTile = null;
-    refreshBoardVisuals();
     isAnimating = false;
   }, 200);
 
