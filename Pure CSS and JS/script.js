@@ -72,6 +72,24 @@ function createTileClone(tile) {
 | Match |
 \*-----*/
 
+function createMatchTile(tile){
+  const tileRect = tile.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+
+  const piece = document.createElement("div");
+  piece.classList.add("explodeTile");
+
+  piece.style.width = `${tileRect.width / 2}px`;
+  piece.style.height = `${tileRect.height / 2}px`;
+  piece.style.backgroundColor = tile.style.backgroundColor;
+
+  piece.style.left = `${tileRect.left - boardRect.left + tileRect.width / 4}px`;
+  piece.style.top = `${tileRect.top - boardRect.top + tileRect.height / 4}px`;
+
+  board.appendChild(piece);
+  return piece;
+}
+
 /***************************\
 | Board creation/generation |
 \***************************/
@@ -315,6 +333,10 @@ function refillTiles(){
 | Animation Scripts |
 \*******************/
 
+/*--------------*\
+| Swap Animation |
+\*--------------*/
+
 function swapAnimation(tileA, tileB) {
   const cloneA = createTileClone(tileA);
   const cloneB = createTileClone(tileB);
@@ -349,6 +371,10 @@ function tileAnimationReset(tile){
   tile.classList.remove("selected","swap")
   tile.classList.add("idle");
 }
+
+/*---------------*\
+| Match Animation |
+\*---------------*/
 
 /**********************\
 | Start/Initialisation |
