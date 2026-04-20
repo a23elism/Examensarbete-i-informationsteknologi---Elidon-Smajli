@@ -72,7 +72,7 @@ function createTileClone(tile) {
 | Match |
 \*-----*/
 
-function createMatchTile(tile){
+function createMatchTile(tile, color){
   const tileRect = tile.getBoundingClientRect();
   const boardRect = board.getBoundingClientRect();
 
@@ -81,7 +81,7 @@ function createMatchTile(tile){
 
   piece.style.width = `${tileRect.width / 2}px`;
   piece.style.height = `${tileRect.height / 2}px`;
-  piece.style.backgroundColor = tile.style.backgroundColor;
+  piece.style.backgroundColor = color;
 
   piece.style.left = `${tileRect.left - boardRect.left + tileRect.width / 4}px`;
   piece.style.top = `${tileRect.top - boardRect.top + tileRect.height / 4}px`;
@@ -390,7 +390,7 @@ function tileAnimationReset(tile){
 | Match Animation |
 \*---------------*/
 
-function explodeTile(tile){
+function explodeTile(tile, color){
   tile.classList.remove("idle", "selected");
   tile.classList.add("matched");
   tile.style.visibility = "hidden";
@@ -398,7 +398,7 @@ function explodeTile(tile){
   const pieces = [];
 
   for (let i = 0; i < 4; i++) {
-    const piece = createMatchTile(tile);
+    const piece = createMatchTile(tile, color);
     pieces.push(piece);
   }
 
@@ -425,8 +425,10 @@ function animateMatch(matchPositions) {
       `.tile[data-row="${row}"][data-col="${col}"]`
     );
 
-    if (tile) {
-      explodeTile(tile);
+    const color = boardData[row][col];
+
+    if (tile && color !== null) {
+      explodeTile(tile, color);
     }
   }
 }
