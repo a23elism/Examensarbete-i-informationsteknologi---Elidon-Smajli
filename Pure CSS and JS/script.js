@@ -289,6 +289,11 @@ function swapAnimation(tileA, tileB){
   tileB.style.transform = `translate(${-moveX}px, ${-moveY}px)`;
 }
 
+function tileAnimationReset(tile){
+  tile.style.transform = "";
+  tile.classList.remove("selected","swap")
+}
+
 /**********************\
 | Start/Initialisation |
 \**********************/
