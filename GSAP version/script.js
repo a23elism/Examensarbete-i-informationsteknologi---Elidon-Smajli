@@ -425,21 +425,18 @@ function explodeTile(tile, color) {
         pieces.push(piece);
     }
 
-    requestAnimationFrame(() => {
-        pieces.forEach(piece => {
-            const moveX = (Math.random() - 0.5) * 180;
-            const moveY = (Math.random() - 0.5) * 180;
-            const rotate = (Math.random() - 0.5) * 360;
-
-            piece.style.transform =
-                `translate(${moveX}px, ${moveY}px) rotate(${rotate}deg) scale(0.4)`;
-            piece.style.opacity = "0";
+    pieces.forEach(piece => {
+        gsap.to(piece, {
+            x: () => (Math.random() - 0.5) * 180,
+            y: () => (Math.random() - 0.5) * 180,
+            rotation: () => (Math.random() - 0.5) * 360,
+            scale: 0.4,
+            opacity: 0,
+            duration: 0.45,
+            ease: "power2.out",
+            onComplete: () => piece.remove()
         });
     });
-
-    setTimeout(() => {
-        pieces.forEach(piece => piece.remove());
-    }, 450);
 }
 
 function animateMatch(matchPositions) {
