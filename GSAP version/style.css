@@ -63,10 +63,6 @@ body {
   cursor: default;
 }
 
-.tile.idle {
- animation: idle 2.5s ease-in-out infinite;
-}
-
 .tile.matched {
   visibility: hidden;
 }

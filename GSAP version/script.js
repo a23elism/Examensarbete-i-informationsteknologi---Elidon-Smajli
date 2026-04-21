@@ -31,7 +31,6 @@ let isAnimating = false;
 function createTile(color, row, col) {
   const tile = document.createElement("div");
   tile.classList.add("tile","idle");
-  tile.style.animationDelay = `${Math.random()*2}s`
 
   //Storing positions
   tile.dataset.row = row;
@@ -40,6 +39,15 @@ function createTile(color, row, col) {
   if(color !== null) {
       tile.style.backgroundColor = color;
       tile.addEventListener("click", () => tileClick(tile))
+
+      gsap.to(tile, {
+        scale: 0.92,
+        duration: 0.8 + Math.random() * 0.4,
+        yoyo: true,
+        repeat: -1,
+        ease: "sine.inOut",
+        delay: Math.random() * 2 
+      });
   } else {
     tile.classList.add("empty");
   }
