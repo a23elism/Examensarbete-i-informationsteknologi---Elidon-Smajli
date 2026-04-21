@@ -383,18 +383,7 @@ function swapAnimation(tileA, tileB) {
   tileA.style.visibility = "hidden";
   tileB.style.visibility = "hidden";
 
-  requestAnimationFrame(() => {
-    cloneA.style.transform = `translate(${moveX}px, ${moveY}px)`;
-    cloneB.style.transform = `translate(${-moveX}px, ${-moveY}px)`;
-  });
-
-  setTimeout(() => {
-    cloneA.remove();
-    cloneB.remove();
-
-    tileA.style.visibility = "visible";
-    tileB.style.visibility = "visible";
-  }, 200);
+  
 }
 
 function tileAnimationReset(tile){
