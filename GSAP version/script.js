@@ -383,7 +383,24 @@ function swapAnimation(tileA, tileB) {
   tileA.style.visibility = "hidden";
   tileB.style.visibility = "hidden";
 
-  
+  gsap.to(cloneA, {
+    x: moveX,
+    y: moveY,
+    duration: 0.2,
+    ease: "power1.inOut"
+  });
+  gsap.to(cloneB, {
+    x: -moveX,
+    y: -moveY,
+    duration: 0.2,
+    ease: "power1.inOut",
+    onComplete: () => {
+      cloneA.remove();
+      cloneB.remove();
+      tileA.style.visibility = "visible";
+      tileA.style.visibility = "visible";
+    }
+  });
 }
 
 function tileAnimationReset(tile){
