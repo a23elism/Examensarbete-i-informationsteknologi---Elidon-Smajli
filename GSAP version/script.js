@@ -67,6 +67,9 @@ function createTileClone(tile) {
     clone.classList.remove("selected", "idle", "swap");
     clone.classList.add("clone");
 
+    gsap.killTweensOf(clone);
+    clone.style.transform = "none";
+
     clone.style.width = `${rect.width}px`;
     clone.style.height = `${rect.height}px`;
     clone.style.left = `${rect.left - boardRect.left}px`;
@@ -398,7 +401,7 @@ function swapAnimation(tileA, tileB) {
             cloneA.remove();
             cloneB.remove();
             tileA.style.visibility = "visible";
-            tileA.style.visibility = "visible";
+            tileB.style.visibility = "visible";
         }
     });
 }
@@ -515,13 +518,12 @@ function animateFall(fallingData) {
 
         board.appendChild(piece);
 
-        requestAnimationFrame(() => {
-            piece.style.transform = `translateY(${(item.toRow - item.fromRow) * step}px)`;
+        gsap.to(piece, {
+            y: (item.toRow - item.fromRow) * step,
+            duration: 0.3,
+            ease: "bounce.out",
+            onComplete: () => piece.remove()
         });
-
-        setTimeout(() => {
-            piece.remove();
-        }, 300);
     });
 }
 
