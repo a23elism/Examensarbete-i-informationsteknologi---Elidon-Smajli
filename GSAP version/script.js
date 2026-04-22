@@ -633,4 +633,20 @@ class PerformanceTester {
             }
         }, 400);
     }
+
+    exportCSV(versionName) {
+        let csvContent = "data:text/csv;charset=utf-8,Second,FPS,Memory(MB),LongTasks\n";
+
+        this.performanceData.forEach(row => {
+            csvContent += `${row.second},${row.fps},${row.memory},${row.LongTasks}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `metrics_${versionName}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
 }
