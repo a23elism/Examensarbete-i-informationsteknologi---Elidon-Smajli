@@ -573,7 +573,7 @@ class PerformanceTester {
             });
             this.observer.observe({ type: 'longtask', buffered: true });
         } catch (e) {
-            console.warn("Long Task observation not working ¯\_(ツ)_/¯ (i dont know why)");
+            console.warn("Long Task observation not working ¯\\_(ツ)_/¯ (i dont know why)");
         }
     }
 
@@ -611,7 +611,7 @@ class PerformanceTester {
 
     runBot() {
         this.botInterval = setInterval(() => {
-            if(typeof isAnimating !== undefined && isAnimating) return;
+            if(typeof isAnimating !== 'undefined' && isAnimating) return;
 
             const tiles = Array.from(document.querySelectorAll(".tile:not(.empty)"));
             if(tiles.length === 0) return;
@@ -648,5 +648,31 @@ class PerformanceTester {
         document.body.appendChild(link);
         link.click();
         link.remove();
+    }
+
+    startTest(durationInSeconds = 30, versionName = "temp") {
+        console.log(`Starting ${durationInSeconds}-second test for ${versionName}`);
+
+        this.performanceData = [];
+        this.frames = 0;
+        this.longTaskCount = 0;
+        this.lastTime = performance.now();
+        this.startTime = performance.now();
+        this.isRunning = true;
+
+        this.setupObserver();
+        this.measureMetrics();
+        this.runBot();
+
+        setTimeout(() => {
+            this.isRunning = false;
+            clearInterval(this.botInterval);
+            if(this.observer) {
+                this.observer.disconnect();
+            }
+
+            console.log(`Automatic performance test done, exporting CSV - ${versionName}`);
+            this.exportCSV(versionName);
+        }, durationInSeconds * 1000);
     }
 }
