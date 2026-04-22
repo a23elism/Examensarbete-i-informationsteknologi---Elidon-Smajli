@@ -563,4 +563,17 @@ class PerformanceTester {
     this.botInterval = null;
     this.observer = null;
   }
+
+  setupObserver() {
+    try {
+      this.observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          this.longTaskCount++;
+        }
+      });
+      this.observer.observe({ type: 'longtask', buffered: true });
+    } catch (e) {
+      console.warn("Long Task observation not working ¯\_(ツ)_/¯ (i dont know why)");
+    }
+  }
 }
