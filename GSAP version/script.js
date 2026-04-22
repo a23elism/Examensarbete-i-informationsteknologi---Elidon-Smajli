@@ -607,5 +607,30 @@ class PerformanceTester {
         }
 
         requestAnimationFrame(this.measureMetrics);
+    };
+
+    runBot() {
+        this.botInterval = setInterval(() => {
+            if(typeof isAnimating !== undefined && isAnimating) return;
+
+            const tiles = Array.from(document.querySelectorAll(".tile:not(.empty)"));
+            if(tiles.length === 0) return;
+
+            const randomTile = tiles[Math.floor(Math.random() * tiles.length)];
+            const row = parseInt(randomTile.dataset.row);
+            const col = parseInt(randomTile.dataset.col);
+            
+            const adjacentTiles = tiles.filter(t => {
+                const tRow = parseInt(t.dataset.row);
+                const tCol = parseInt(t.dataset.col);
+                return(tRow === row && tCol === col +1) || (tRow === row +1 && tCol === col);
+            });
+
+            if(adjacentTiles.length > 0) {
+                const neighbor = adjacentTiles[Math.floor(Math.random() * adjacentTiles.length)];
+                randomTile.click();
+                setTimeout(() => neighbor.click(), 100);
+            }
+        }, 400);
     }
 }
