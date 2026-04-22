@@ -576,4 +576,36 @@ class PerformanceTester {
             console.warn("Long Task observation not working ¯\_(ツ)_/¯ (i dont know why)");
         }
     }
+
+    measureMetrics = () => {
+        if(!this.isRunning) return;
+
+        this.frames++;
+        const now = performance.now();
+
+        if(now - this.lastTime >= 1000) {
+            const fps = Math.round((this.frames * 1000) / (now - this.lastTime));
+            const elapsedTime = Math.round((now - this.startTime) / 1000);
+
+            let memoryMB = 0;
+            if(performance.memory) {
+                memoryMB = Math.round(performance.memory.usedJSHeapSize / (1024 * 1024));
+            }
+
+            this.performanceData.push({
+                second: elapsedTime,
+                fps: fps,
+                memory: memoryMB,
+                LongTasks: this.longTaskCount
+            });
+
+            console.log(`Time: ${elapsedTime} | FPS: ${fps} | RAM: ${memoryMB} | Stutters ${this.longTaskCount}`);
+
+            this.frames = 0;
+            this.longTaskCount = 0;
+            this.lastTime = now;
+        }
+
+        requestAnimationFrame(this.measureMetrics);
+    }
 }
