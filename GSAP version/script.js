@@ -553,27 +553,27 @@ renderBoard();
 \**************/
 
 class PerformanceTester {
-  constructor() {
-    this.performanceData = [];
-    this.frames = 0;
-    this.longTaskCount = 0;
-    this.lastTime = performance.now();
-    this.startTime = performance.now();
-    this.isRunning = false;
-    this.botInterval = null;
-    this.observer = null;
-  }
-
-  setupObserver() {
-    try {
-      this.observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          this.longTaskCount++;
-        }
-      });
-      this.observer.observe({ type: 'longtask', buffered: true });
-    } catch (e) {
-      console.warn("Long Task observation not working ¯\_(ツ)_/¯ (i dont know why)");
+    constructor() {
+        this.performanceData = [];
+        this.frames = 0;
+        this.longTaskCount = 0;
+        this.lastTime = performance.now();
+        this.startTime = performance.now();
+        this.isRunning = false;
+        this.botInterval = null;
+        this.observer = null;
     }
-  }
+
+    setupObserver() {
+        try {
+            this.observer = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    this.longTaskCount++;
+                }
+            });
+            this.observer.observe({ type: 'longtask', buffered: true });
+        } catch (e) {
+            console.warn("Long Task observation not working ¯\_(ツ)_/¯ (i dont know why)");
+        }
+    }
 }
