@@ -599,7 +599,7 @@ class PerformanceTester {
                 LongTasks: this.longTaskCount
             });
 
-            console.log(`Time: ${elapsedTime} | FPS: ${fps} | RAM: ${memoryMB} | Stutters ${this.longTaskCount}`);
+            console.log(`Time: ${elapsedTime}s | FPS: ${fps} | RAM: ${memoryMB}MB | Stutters ${this.longTaskCount}`);
 
             this.frames = 0;
             this.longTaskCount = 0;
@@ -635,7 +635,7 @@ class PerformanceTester {
     }
 
     exportCSV(versionName) {
-        let csvContent = "data:text/csv;charset=utf-8,Second,FPS,Memory(MB),LongTasks\n";
+        let csvContent = "data:text/csv;charset=utf-8,Second,FPS,Memory(MB),LongTasks/stutters\n";
 
         this.performanceData.forEach(row => {
             csvContent += `${row.second},${row.fps},${row.memory},${row.LongTasks}\n`;
