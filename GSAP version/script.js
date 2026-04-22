@@ -547,3 +547,132 @@ while (matches.length > 0) {
     matches = matchCheck();
 }
 renderBoard();
+
+/**************\
+| Testing Tool |
+\**************/
+
+class PerformanceTester {
+    constructor() {
+        this.performanceData = [];
+        this.frames = 0;
+        this.longTaskCount = 0;
+        this.lastTime = performance.now();
+        this.startTime = performance.now();
+        this.isRunning = false;
+        this.botInterval = null;
+        this.observer = null;
+    }
+
+    setupObserver() {
+        try {
+            this.observer = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    this.longTaskCount++;
+                }
+            });
+            this.observer.observe({ type: 'longtask', buffered: true });
+        } catch (e) {
+            console.warn("Long Task observation not working ¯\\_(ツ)_/¯ (i dont know why)");
+        }
+    }
+
+    measureMetrics = () => {
+        if (!this.isRunning) return;
+
+        this.frames++;
+        const now = performance.now();
+
+        if (now - this.lastTime >= 1000) {
+            const fps = Math.round((this.frames * 1000) / (now - this.lastTime));
+            const elapsedTime = Math.round((now - this.startTime) / 1000);
+
+            let memoryMB = 0;
+            if (performance.memory) {
+                memoryMB = Math.round(performance.memory.usedJSHeapSize / (1024 * 1024));
+            }
+
+            this.performanceData.push({
+                second: elapsedTime,
+                fps: fps,
+                memory: memoryMB,
+                LongTasks: this.longTaskCount
+            });
+
+            console.log(`Time: ${elapsedTime}s | FPS: ${fps} | RAM: ${memoryMB}MB | Stutters ${this.longTaskCount}`);
+
+            this.frames = 0;
+            this.longTaskCount = 0;
+            this.lastTime = now;
+        }
+
+        requestAnimationFrame(this.measureMetrics);
+    };
+
+    runBot() {
+        this.botInterval = setInterval(() => {
+            if (typeof isAnimating !== 'undefined' && isAnimating) return;
+
+            const tiles = Array.from(document.querySelectorAll(".tile:not(.empty)"));
+            if (tiles.length === 0) return;
+
+            const randomTile = tiles[Math.floor(Math.random() * tiles.length)];
+            const row = parseInt(randomTile.dataset.row);
+            const col = parseInt(randomTile.dataset.col);
+
+            const adjacentTiles = tiles.filter(t => {
+                const tRow = parseInt(t.dataset.row);
+                const tCol = parseInt(t.dataset.col);
+                return (tRow === row && tCol === col + 1) || (tRow === row + 1 && tCol === col);
+            });
+
+            if (adjacentTiles.length > 0) {
+                const neighbor = adjacentTiles[Math.floor(Math.random() * adjacentTiles.length)];
+                randomTile.click();
+                setTimeout(() => neighbor.click(), 100);
+            }
+        }, 400);
+    }
+
+    exportCSV(versionName) {
+        let csvContent = "data:text/csv;charset=utf-8,Second,FPS,Memory(MB),LongTasks/stutters\n";
+
+        this.performanceData.forEach(row => {
+            csvContent += `${row.second},${row.fps},${row.memory},${row.LongTasks}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `metrics_${versionName}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+
+    startTest(durationInSeconds = 30, versionName = "temp") {
+        console.log(`Starting ${durationInSeconds}-second test for ${versionName}`);
+
+        this.performanceData = [];
+        this.frames = 0;
+        this.longTaskCount = 0;
+        this.lastTime = performance.now();
+        this.startTime = performance.now();
+        this.isRunning = true;
+
+        this.setupObserver();
+        this.measureMetrics();
+        this.runBot();
+
+        setTimeout(() => {
+            this.isRunning = false;
+            clearInterval(this.botInterval);
+            if (this.observer) {
+                this.observer.disconnect();
+            }
+
+            console.log(`Automatic performance test done, exporting CSV - ${versionName}`);
+            this.exportCSV(versionName);
+        }, durationInSeconds * 1000);
+    }
+}
