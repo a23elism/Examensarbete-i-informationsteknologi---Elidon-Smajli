@@ -547,3 +547,20 @@ while (matches.length > 0) {
     matches = matchCheck();
 }
 renderBoard();
+
+/**************\
+| Testing Tool |
+\**************/
+
+class PerformanceTester {
+  constructor() {
+    this.performanceData = [];
+    this.frames = 0;
+    this.longTaskCount = 0;
+    this.lastTime = performance.now();
+    this.startTime = performance.now();
+    this.isRunning = false;
+    this.botInterval = null;
+    this.observer = null;
+  }
+}
