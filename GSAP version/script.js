@@ -5,6 +5,10 @@
 const board = document.getElementById("board");
 
 const gridSize = 8;
+const tileSize = 64;
+const gridGap = 4;
+const gridStep = tileSize + gridGap;
+const boardPadding = 8;
 
 const tileTypes = [
     "red",
@@ -38,7 +42,7 @@ function createTile(color, row, col) {
 
     if (color !== null) {
         tile.style.backgroundColor = color;
-        tile.addEventListener("click", () => tileClick(tile))
+        tile.addEventListener("click", () => tileClick(tile));
 
         gsap.to(tile, {
             scale: 0.92,
@@ -59,21 +63,19 @@ function createTile(color, row, col) {
 | Clone |
 \*-----*/
 
-function createTileClone(tile) {
-    const rect = tile.getBoundingClientRect();
-    const boardRect = board.getBoundingClientRect();
-
+function createTileClone(tile, row, col) {
     const clone = tile.cloneNode(true);
     clone.classList.remove("selected", "idle", "swap");
     clone.classList.add("clone");
 
     gsap.killTweensOf(clone);
+    clone.style.transition = "none";
     clone.style.transform = "none";
 
-    clone.style.width = `${rect.width}px`;
-    clone.style.height = `${rect.height}px`;
-    clone.style.left = `${rect.left - boardRect.left}px`;
-    clone.style.top = `${rect.top - boardRect.top}px`;
+    clone.style.width = `${tileSize}px`;
+    clone.style.height = `${tileSize}px`;
+    clone.style.left = `${boardPadding + col * gridStep}px`;
+    clone.style.top = `${boardPadding + row * gridStep}px`;
 
     board.appendChild(clone);
     return clone;
@@ -83,19 +85,17 @@ function createTileClone(tile) {
 | Match |
 \*-----*/
 
-function createMatchTile(tile, color) {
-    const tileRect = tile.getBoundingClientRect();
-    const boardRect = board.getBoundingClientRect();
-
+function createMatchTile(row, col, color) {
     const piece = document.createElement("div");
     piece.classList.add("explodeTile");
+    piece.style.transition = "none";
 
-    piece.style.width = `${tileRect.width / 2}px`;
-    piece.style.height = `${tileRect.height / 2}px`;
+    piece.style.width = `${tileSize / 2}px`;
+    piece.style.height = `${tileSize / 2}px`;
     piece.style.backgroundColor = color;
 
-    piece.style.left = `${tileRect.left - boardRect.left + tileRect.width / 4}px`;
-    piece.style.top = `${tileRect.top - boardRect.top + tileRect.height / 4}px`;
+    piece.style.left = `${boardPadding + col * gridStep + tileSize / 4}px`;
+    piece.style.top = `${boardPadding + row * gridStep + tileSize / 4}px`;
 
     board.appendChild(piece);
     return piece;
@@ -115,7 +115,7 @@ function generateBoardData() {
             const randomColor = tileTypes[Math.floor(Math.random() * tileTypes.length)];
             currrentRow.push(randomColor);
         }
-        boardData.push(currrentRow)
+        boardData.push(currrentRow);
     }
 }
 
@@ -163,6 +163,7 @@ function refreshBoardVisuals() {
 
 function tileClick(tile) {
     if (isAnimating) return;
+
     if (selectedTile === tile) {
         tile.classList.remove("selected");
         tile.classList.add("idle");
@@ -185,12 +186,11 @@ function tileClick(tile) {
         orgTile.classList.remove("selected", "idle");
         tile.classList.remove("selected", "idle");
 
-        swapAnimation(orgTile, tile);
-
-        setTimeout(() => {
+        swapAnimation(orgTile, tile, () => {
             tileSwap(orgTile, tile);
             refreshBoardVisuals();
-            let matches = matchCheck();
+
+            const matches = matchCheck();
 
             if (matches.length > 0) {
                 allMatches(matches);
@@ -199,14 +199,17 @@ function tileClick(tile) {
 
             selectedTile = null;
             isAnimating = false;
-        }, 200);
+        });
 
         return;
     }
 
     orgTile.classList.remove("selected");
+    orgTile.classList.add("idle");
+
     selectedTile = tile;
     tile.classList.add("selected");
+    tile.classList.remove("idle");
 }
 
 /***********\
@@ -292,7 +295,7 @@ function matchCheck() {
         }
         if (count >= 3) {
             for (let i = 0; i < count; i++) {
-                matchPos.push([gridSize - 1 - i, col])
+                matchPos.push([gridSize - 1 - i, col]);
             }
         }
     }
@@ -351,7 +354,7 @@ function refillTiles() {
                 boardData[row][col] = randomColor;
                 newTiles.push({
                     color: randomColor,
-                    fromRow: 0,
+                    fromRow: -1 - spawnOffset,
                     toRow: row,
                     col: col,
                     isNew: true
@@ -371,17 +374,17 @@ function refillTiles() {
 | Swap Animation |
 \*--------------*/
 
-function swapAnimation(tileA, tileB) {
-    const cloneA = createTileClone(tileA);
-    const cloneB = createTileClone(tileB);
-
+function swapAnimation(tileA, tileB, onComplete) {
     const rowA = parseInt(tileA.dataset.row);
     const rowB = parseInt(tileB.dataset.row);
     const colA = parseInt(tileA.dataset.col);
     const colB = parseInt(tileB.dataset.col);
 
-    const moveX = (colB - colA) * tileA.offsetWidth;
-    const moveY = (rowB - rowA) * tileA.offsetHeight;
+    const cloneA = createTileClone(tileA, rowA, colA);
+    const cloneB = createTileClone(tileB, rowB, colB);
+
+    const moveX = (colB - colA) * gridStep;
+    const moveY = (rowB - rowA) * gridStep;
 
     tileA.style.visibility = "hidden";
     tileB.style.visibility = "hidden";
@@ -402,13 +405,14 @@ function swapAnimation(tileA, tileB) {
             cloneB.remove();
             tileA.style.visibility = "visible";
             tileB.style.visibility = "visible";
+            if (onComplete) onComplete();
         }
     });
 }
 
 function tileAnimationReset(tile) {
     tile.style.transform = "";
-    tile.classList.remove("selected", "swap")
+    tile.classList.remove("selected", "swap");
     tile.classList.add("idle");
 }
 
@@ -416,34 +420,20 @@ function tileAnimationReset(tile) {
 | Match Animation |
 \*---------------*/
 
-function explodeTile(tile, color) {
-    tile.classList.remove("idle", "selected");
-    tile.classList.add("matched");
-    tile.style.visibility = "hidden";
+function animateMatch(matchPositions, onComplete) {
+    const tl = gsap.timeline({ onComplete });
 
-    const pieces = [];
+    const uniquePositions = [];
+    const seen = new Set();
 
-    for (let i = 0; i < 4; i++) {
-        const piece = createMatchTile(tile, color);
-        pieces.push(piece);
-    }
-
-    pieces.forEach(piece => {
-        gsap.to(piece, {
-            x: () => (Math.random() - 0.5) * 180,
-            y: () => (Math.random() - 0.5) * 180,
-            rotation: () => (Math.random() - 0.5) * 360,
-            scale: 0.4,
-            opacity: 0,
-            duration: 0.45,
-            ease: "power2.out",
-            onComplete: () => piece.remove()
-        });
-    });
-}
-
-function animateMatch(matchPositions) {
     for (const [row, col] of matchPositions) {
+        const key = `${row}-${col}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniquePositions.push([row, col]);
+        }
+    }
+    for (const [row, col] of uniquePositions) {
         const tile = document.querySelector(
             `.tile[data-row="${row}"][data-col="${col}"]`
         );
@@ -451,8 +441,29 @@ function animateMatch(matchPositions) {
         const color = boardData[row][col];
 
         if (tile && color !== null) {
-            explodeTile(tile, color);
+            tile.classList.remove("idle", "selected");
+            tile.classList.add("matched");
+            tile.style.visibility = "hidden";
+
+            for (let i = 0; i < 4; i++) {
+                const piece = createMatchTile(row, col, color);
+
+                tl.to(piece, {
+                    x: (Math.random() - 0.5) * 180,
+                    y: (Math.random() - 0.5) * 180,
+                    rotation: (Math.random() - 0.5) * 360,
+                    scale: 0.4,
+                    opacity: 0,
+                    duration: 0.45,
+                    ease: "power2.out",
+                    onComplete: () => piece.remove()
+                }, 0);
+            }
         }
+    }
+
+    if (tl.getChildren().length === 0 && onComplete) {
+        onComplete();
     }
 }
 
@@ -464,30 +475,28 @@ function allMatches(matches) {
         return;
     }
 
-    animateMatch(matches);
-
-    setTimeout(() => {
+    animateMatch(matches, () => {
         removeMatch(matches);
 
         const fallenTiles = tileFall();
         const newTiles = refillTiles();
 
-        animateFall([...fallenTiles, ...newTiles]);
-
-        setTimeout(() => {
+        animateFall([...fallenTiles, ...newTiles], () => {
             refreshBoardVisuals();
 
             const newMatches = matchCheck();
             allMatches(newMatches);
-        }, 300);
-    }, 450);
+        });
+    });
 }
 
 /*---------------*\
 | Fall Animation |
 \*---------------*/
 
-function animateFall(fallingData) {
+function animateFall(fallingData, onComplete) {
+    const tl = gsap.timeline({ onComplete });
+
     fallingData.forEach(item => {
         if (!item.isNew) {
             const originalTile = document.querySelector(
@@ -501,30 +510,29 @@ function animateFall(fallingData) {
 
         const piece = document.createElement("div");
         piece.classList.add("clone");
+        piece.style.transition = "none";
 
-        piece.style.width = "64px";
-        piece.style.height = "64px";
+        piece.style.width = `${tileSize}px`;
+        piece.style.height = `${tileSize}px`;
         piece.style.borderRadius = "12px";
         piece.style.border = "2px solid grey";
         piece.style.backgroundColor = item.color;
 
-        const tileSize = 64;
-        const gap = 4;
-        const padding = 8;
-        const step = tileSize + gap;
-
-        piece.style.left = `${padding + item.col * step}px`;
-        piece.style.top = `${padding + item.fromRow * step}px`;
+        piece.style.left = `${boardPadding + item.col * gridStep}px`;
+        piece.style.top = `${boardPadding + item.fromRow * gridStep}px`;
 
         board.appendChild(piece);
 
-        gsap.to(piece, {
-            y: (item.toRow - item.fromRow) * step,
+        tl.to(piece, {
+            y: (item.toRow - item.fromRow) * gridStep,
             duration: 0.3,
             ease: "bounce.out",
             onComplete: () => piece.remove()
-        });
+        }, 0);
     });
+    if (tl.getChildren().length === 0 && onComplete) {
+        onComplete();
+    }
 }
 
 /**********************\
